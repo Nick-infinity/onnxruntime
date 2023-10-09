@@ -14,6 +14,18 @@ class ReshapeHelper {
     auto nDims = requested_shape.size();
     ptrdiff_t unknown_dim = -1;
     int64_t size = 1;
+    size_t inputDims = input_shape.NumDimensions();
+
+// Allow opset-13 Reshape op to have dimension as 0 at index greater than max input rank
+    if(!allow_zero && inputDims<nDims){
+      for(auto p = inputDims; p<nDims; ++p){
+        if(requested_shape[p] == 0){
+            allow_zero = true;
+            break;
+        }
+      }
+    }
+
     for (size_t i = 0; i < nDims; ++i) {
       ORT_ENFORCE(requested_shape[i] >= -1, "A dimension cannot be less than -1, got ", requested_shape[i]);
       if (requested_shape[i] == -1) {
